@@ -1,8 +1,8 @@
 {
-  "name": "Dad Joke",
-  "action_description": "Makes a Dad Joke API call and returns a joke",
-  "plugin_description": "Makes a dad joke",
-  "action_type": "dad_joke",
+  "name": "Snowflake",
+  "action_description": "Connects to Snowflake and executes a query",
+  "plugin_description": "Snowflake connector",
+  "action_type": "snowflake_query",
   "runtime": "python 3.12",
   "inputs": [],
   "outputs": [
