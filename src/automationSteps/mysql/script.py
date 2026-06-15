@@ -2,11 +2,13 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 def connect_to_mysql():
+
+  target = None
     
   connection_config = {
-      'host': 'localhost',
-      'port': 3306,
-      'user': 'root',               
+      'host': '6.tcp.ngrok.io',
+      'port': 28010,
+      'user': 'ScottF_Kizen',               
       'password': 'test12345',
       'database': 'demodb',   
       'charset': 'utf8mb4',         
@@ -26,10 +28,11 @@ def connect_to_mysql():
           outputs.log(f"Socket: {result['@@socket']}")
           outputs.log(f"Version: {result['@@version']}")
           
-          cursor.execute("SELECT * FROM demodb.users;")
+          cursor.execute("SELECT * FROM demodb.users LIMIT 1;")
           rows = cursor.fetchall()
           for row in rows:
               outputs.log(row)
+              outputs.target = str(row['age'])
       
       return connection
       
@@ -42,5 +45,4 @@ def connect_to_mysql():
           connection.close()
           outputs.log("MySQL connection closed")
 
-if __name__ == "__main__":
-  db_connection = connect_to_mysql()
+db_connection = connect_to_mysql()
