@@ -25,15 +25,22 @@
       "data_type": "string",
       "required": true,
       "script_alias": "user"
+    },
+    {
+      "name": "sql_column",
+      "label": "SQL_Column",
+      "data_type": "string",
+      "required": true,
+      "script_alias": "sql_column"
     }
   ],
   "outputs": [
     {
-      "name": "target",
-      "label": "Target",
+      "name": "result",
+      "label": "Result",
       "data_type": "string",
       "required": true,
-      "script_alias": "target"
+      "script_alias": "result"
     }
   ]
 }

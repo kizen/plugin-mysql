@@ -59,7 +59,7 @@ def connect_to_mysql():
           rows = cursor.fetchall()
           for row in rows:
               outputs.log(row)
-              outputs.target = str(row['age'])
+              outputs.result = str(row[inputs.sql_column])
       
       return connection
       
