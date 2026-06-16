@@ -3,25 +3,16 @@ from pymysql.cursors import DictCursor
 
 def connect_to_mysql():
 
-  target = None
-
   outputs.log(f'Secret: {secrets}')
 
-  secret_name = next(iter(key for key in secrets if key.endswith("mysql_password")), None)
-  
-  outputs.log(f'Secret name: {secret_name}')
-  MYSQL_PASSWORD = secrets[secret_name]
-  outputs.log(f'MYSQL_PASSWORD: {MYSQL_PASSWORD}')
+  secret_password = next(iter(key for key in secrets if key.endswith("mysql_password")), None)
+  MYSQL_PASSWORD = secrets[secret_password]
 
   secret_host = next(iter(key for key in secrets if key.endswith("mysql_host")), None)
-  outputs.log(f'Secret name: {secret_host}')
   MYSQL_HOST = secrets[secret_host]
-  outputs.log(f'MYSQL_HOST: {MYSQL_HOST}')
 
   secret_port = next(iter(key for key in secrets if key.endswith("mysql_port")), None)
-  outputs.log(f'Secret name: {secret_port}')
   MYSQL_PORT = secrets[secret_port]
-  outputs.log(f'MYSQL_PORT: {MYSQL_PORT}')
 
   INPUT_USER = inputs.user
   outputs.log(f'INPUT_USER: {INPUT_USER}')
@@ -35,10 +26,10 @@ def connect_to_mysql():
   connection_config = {
       'host': MYSQL_HOST,
       'port': int(MYSQL_PORT),
-      'user': INPUT_USER, # user parameter/secret?
+      'user': INPUT_USER,
       'password': MYSQL_PASSWORD,
-      'database': INPUT_DATABASE, # database parameter
-      'charset': 'utf8mb4',         
+      'database': INPUT_DATABASE,
+      'charset': 'utf8mb4',
       'cursorclass': DictCursor,    
       'connect_timeout': 10         
   }
@@ -55,7 +46,7 @@ def connect_to_mysql():
           outputs.log(f"Socket: {result['@@socket']}")
           outputs.log(f"Version: {result['@@version']}")
           
-          cursor.execute(INPUT_QUERY) # query parameter, extra parameters?
+          cursor.execute(INPUT_QUERY)
           rows = cursor.fetchall()
           for row in rows:
               outputs.log(row)
