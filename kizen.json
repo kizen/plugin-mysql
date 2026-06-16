@@ -1,6 +1,6 @@
 {
   "name": "MySQL Plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "published": true,
   "release_branch": ["main"],
   "api_name": "plugin-mysql",
