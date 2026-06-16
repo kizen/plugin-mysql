@@ -3,7 +3,7 @@
   "version": "1.0.2",
   "published": true,
   "release_branch": ["main"],
-  "api_name": "plugin-mysql",
+  "api_name": "plugin_mysql",
   "external_link": "",
   "description": "Development MySQL plugin for Scott F — sample toolbar items, views, modals, and setup assistant fields.",
   "entry": "src/",
