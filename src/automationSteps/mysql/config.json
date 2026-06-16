@@ -4,6 +4,7 @@
   "plugin_description": "MySQL connector",
   "action_type": "mysql_query",
   "runtime": "python 3.12",
+  "secrets": ["mysql_password"],
   "inputs": [],
   "outputs": [
     {

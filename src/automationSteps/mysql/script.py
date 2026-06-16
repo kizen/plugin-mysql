@@ -4,12 +4,19 @@ from pymysql.cursors import DictCursor
 def connect_to_mysql():
 
   target = None
+
+  secret_name = next(iter(key for key in secrets if key.endswith("mysql_password")), None)
+  outputs.log(f'Secret: {secrets}')
+  outputs.log(f'Secret name: {secret_name}')
+  MYSQL_PASSWORD = secrets[secret_name]
+  outputs.log(f'MYSQL_PASSWORD: {MYSQL_PASSWORD}')
+  
     
   connection_config = {
       'host': '6.tcp.ngrok.io',
       'port': 28010,
       'user': 'ScottF_Kizen',               
-      'password': 'test12345',
+      'password': MYSQL_PASSWORD,
       'database': 'demodb',   
       'charset': 'utf8mb4',         
       'cursorclass': DictCursor,    
