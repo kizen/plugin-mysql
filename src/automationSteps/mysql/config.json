@@ -12,12 +12,7 @@
       "label": "Target",
       "data_type": "string",
       "required": true,
-      "input_source": "object_field",
-      "hint_field_name": "target",
-      "hint_related_object_field_name": null,
-      "script_alias": "target",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
+      "script_alias": "target"
     }
   ]
 }
