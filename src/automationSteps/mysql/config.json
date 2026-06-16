@@ -5,7 +5,28 @@
   "action_type": "mysql_query",
   "runtime": "python 3.12",
   "secrets": ["mysql_password", "mysql_host", "mysql_port"],
-  "inputs": [],
+  "inputs": [{
+      "name": "database",
+      "label": "Database",
+      "data_type": "string",
+      "required": true,
+      "script_alias": "database"
+    },
+    {
+      "name": "query",
+      "label": "Query",
+      "data_type": "string",
+      "required": true,
+      "script_alias": "query"
+    },
+    {
+      "name": "user",
+      "label": "User",
+      "data_type": "string",
+      "required": true,
+      "script_alias": "user"
+    }
+  ],
   "outputs": [
     {
       "name": "target",

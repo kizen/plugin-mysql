@@ -23,12 +23,21 @@ def connect_to_mysql():
   MYSQL_PORT = secrets[secret_port]
   outputs.log(f'MYSQL_PORT: {MYSQL_PORT}')
 
+  INPUT_USER = inputs.user
+  outputs.log(f'INPUT_USER: {INPUT_USER}')
+
+  INPUT_DATABASE = inputs.database
+  outputs.log(f'INPUT_DATABASE: {INPUT_DATABASE}')
+
+  INPUT_QUERY = inputs.query
+  outputs.log(f'INPUT_QUERY: {INPUT_QUERY}')
+
   connection_config = {
       'host': MYSQL_HOST,
       'port': int(MYSQL_PORT),
-      'user': 'ScottF_Kizen', # user parameter/secret?
+      'user': INPUT_USER, # user parameter/secret?
       'password': MYSQL_PASSWORD,
-      'database': 'demodb', # database parameter
+      'database': INPUT_DATABASE, # database parameter
       'charset': 'utf8mb4',         
       'cursorclass': DictCursor,    
       'connect_timeout': 10         
@@ -46,7 +55,7 @@ def connect_to_mysql():
           outputs.log(f"Socket: {result['@@socket']}")
           outputs.log(f"Version: {result['@@version']}")
           
-          cursor.execute("SELECT * FROM demodb.users LIMIT 1;") # query parameter, extra parameters?
+          cursor.execute(INPUT_QUERY) # query parameter, extra parameters?
           rows = cursor.fetchall()
           for row in rows:
               outputs.log(row)
