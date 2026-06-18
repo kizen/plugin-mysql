@@ -48,10 +48,21 @@ def connect_to_mysql():
           
           cursor.execute(INPUT_QUERY)
           rows = cursor.fetchall()
-          
+
           outputs.log(f"Rows: {rows}")
-          outputs.log(f"Rows First Value: {next(iter(rows[0].values()))}")
-          outputs.result = str(next(iter(rows[0].values())))
+          
+          if not rows:
+              outputs.log("Query returned no rows")
+              outputs.result = ""
+          elif len(rows) == 1 and len(rows[0]) == 1:
+              # Single row, single column -> return just that value
+              single_value = next(iter(rows[0].values()))
+              outputs.log(f"Single value result: {single_value}")
+              outputs.result = str(single_value)
+          else:
+              # Multiple rows or multiple columns -> return entire dataset
+              outputs.log(f"Multiple values detected: {len(rows)} rows")
+              outputs.result = str(rows)
       
       return connection
       
