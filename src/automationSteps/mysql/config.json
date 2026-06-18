@@ -25,13 +25,6 @@
       "data_type": "string",
       "required": true,
       "script_alias": "user"
-    },
-    {
-      "name": "sql_column",
-      "label": "SQL_Column",
-      "data_type": "string",
-      "required": true,
-      "script_alias": "sql_column"
     }
   ],
   "outputs": [

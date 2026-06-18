@@ -50,7 +50,7 @@ def connect_to_mysql():
           rows = cursor.fetchall()
           for row in rows:
               outputs.log(row)
-              outputs.result = str(row[inputs.sql_column])
+              outputs.result = str(next(iter(row.values())))
       
       return connection
       
