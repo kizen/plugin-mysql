@@ -1,5 +1,5 @@
 {
-  "name": "Run MySQL Query",
+  "name": "Run Query",
   "action_description": "Connects to MySQL and executes a query",
   "plugin_description": "MySQL connector",
   "action_type": "mysql_query",
