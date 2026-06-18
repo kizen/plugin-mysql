@@ -5,7 +5,7 @@
   "release_branch": ["main"],
   "api_name": "plugin_mysql",
   "external_link": "",
-  "description": "Development MySQL plugin for Scott F — sample toolbar items, views, modals, and setup assistant fields.",
+  "description": "Development plugin to query data from MySQL",
   "entry": "src/",
   "engine": "1.0.0",
   "release_notes_directory": "releaseNotes/",
