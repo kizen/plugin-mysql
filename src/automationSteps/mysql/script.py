@@ -48,9 +48,9 @@ def connect_to_mysql():
           
           cursor.execute(INPUT_QUERY)
           rows = cursor.fetchall()
-          for row in rows:
-              outputs.log(row)
-              outputs.result = str(next(iter(row.values())))
+          outputs.log(f"Rows: {rows}")
+          outputs.log(f"Rows First Value: {next(iter(rows[0].values()))}")
+          outputs.result = str(next(iter(rows[0].values())))
       
       return connection
       
