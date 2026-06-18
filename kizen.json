@@ -1,5 +1,5 @@
 {
-  "name": "mysql_plugin",
+  "name": "MySQL Plugin",
   "version": "1.0.2",
   "published": true,
   "release_branch": ["main"],
