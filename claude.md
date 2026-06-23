@@ -1,187 +1,87 @@
-Plugin Overview
-This repo contains the MySQL integration plugin for Kizen's Agentic Workflow engine. It adds a read-only Run Query action step that connects to external MySQL instances, executes parameterized SELECT queries, and returns results to workflow context.
-
-Pillar: Expand
-Epic: KZN-17383
-Feasibility Spike: KZN-17261
-Container Dependency: KZN-17366 - mysqlclient must be in agentic-workflow container image
-
-1. Key Architecture Decisions
-Decision
-
-Rationale
-
-Driver: pymysql not mysqlclient
-
-Pure Python, no C dependencies. Avoids container build complexity. mysqlclient was originally specced but pymysql is used in v1 for portability.
-
-Read-only v1
-
-Limits blast radius and security review scope. No write operations, DDL, or stored procs. Only SELECT allowed.
-
-Named Connections
-
-Matches pattern from Slack/Zoom plugins. Allows multiple DBs per org. Credentials encrypted via Kizen Secrets Manager.
-
-Direct TCP, no tunneling
-
-v1 requires customer to expose DB with IP allowlist. SSH/VPC peering is future phase to reduce scope.
-
-Result format: string
-
-Single cell returns as string. Multi-row/column returns as JSON-encoded string. Keeps workflow variable type consistent. Empty result = "".
-
-10s connect timeout
-
-Prevents hung workers. MySQL query timeout is governed by server max_execution_time.
-
-2. Connection + Secrets Pattern
-Secrets are not passed directly. The plugin expects secrets to be stored in Kizen Secrets Manager with specific suffixes:
-
-Required secret suffixes:
-
-mysql_host : MySQL hostname or IP
-mysql_port : Port as string, cast to int
-mysql_password : Password for the user
-Required inputs:
-
-inputs.user : MySQL username
-inputs.database : Target database name
-inputs.query : SQL SELECT statement
-Secret resolution logic:
-
-Python
-secret_password = next(iter(key for key in secrets if key.endswith("mysql_password")), None)
-MYSQL_PASSWORD = secrets[secret_password]
-This allows multiple MySQL connections to coexist in one org without collision.
-
-SSL: Handled by pymysql defaults. ssl_mode from connection config is not yet wired in v1. Default is PREFERRED. For VERIFY_CA, cert upload will be added in KZN-XXXXY.
-
-3. Security Rules
-No SQL injection: Do not concatenate user input into inputs.query without parameterization. v1 relies on workflow authors to use safe queries. Future: add automatic variable binding for {{workflow_vars}}.
-Principle of least privilege: Docs must tell customers to create read-only MySQL user: GRANT SELECT ON db.* TO 'kizen_ro'@'%';
-No credential logging: Never log MYSQL_PASSWORD, connection_config, or full DSN. Host and port are ok to log for debugging.
-Query allowlist: Only SELECT statements. Reject queries starting with INSERT, UPDATE, DELETE, DROP, CREATE, ALTER. This is not enforced in code yet - add guard in KZN-XXXXZ.
-Error messages: Return clean errors to user. Database connection failed: check credentials and network allowlist. Full traceback goes to internal logs only.
-4. Code Entry Points
-File
-
-Purpose
-
-main.py
-
-Entry point. Exports connect_to_mysql() called by workflow runner.
-
-main.py:connect_to_mysql()
-
-Resolves secrets, builds connection, executes query, formats output, closes connection.
-
-requirements.txt
-
-pymysql>=1.1.0 required. Blocked until KZN-17366 merges.
-
-Output contract:
-
-outputs.result : Always string. Set by plugin.
-outputs.log() : Internal logging only. Not shown to user unless error.
-Result shaping logic:
-
-No rows → outputs.result = ""
-1 row, 1 column → outputs.result = str(value)
-Else → outputs.result = str(rows) where rows is list of dicts from DictCursor
-5. Testing
-Unit tests: tests/test_mysql.py using pytest + pymysql mocking
-Run: pytest tests/
-
-Required test cases:
-
-Connection success with valid creds
-Connection fail with bad host → clean error
-Query returns single value → string result
-Query returns multiple rows → JSON string result
-Query returns empty → "" result
-Secret resolution finds correct suffix
-
-E2E blocked: Cannot run in workflow until KZN-17366 adds pymysql to container.
-
-6. Error Handling Patterns
-Match existing plugin UI pattern:
-
-Error Type
-
-User Message
-
-Internal Log
-
-Auth failure
-
-Database connection failed: check credentials and network allowlist
-
-pymysql.err.OperationalError: (1045, "Access denied...")
-
-Network timeout
-
-Database connection failed: check credentials and network allowlist
-
-pymysql.err.OperationalError: (2003, "Can't connect...")
-
-Query error
-
-Query error: {mysql_error}
-
-Full SQL + traceback
-
-Empty result
-
-No error. Returns ""
-
-Query returned no rows
-
-Notify Plugin Developer toggle: Available in UI. When enabled, errors trigger Slack alert to #workflow-plugins.
-
-7. Local Development
-Clone repo: git clone git@github.com:kizen/plugin-mysql.git
-Install deps: pip install -r requirements.txt
-Set env vars to mimic Kizen secrets: export MYSQL_HOST=localhost ...
-Run: python main.py with mocked inputs, outputs, secrets
-Docker: Use agentic-workflow image once KZN-17366 merges.
-
-8. Future Work / Out of Scope for v1
-Ticket
-
-Description
-
-KZN-XXXXY
-
-Support SSL CA cert upload + VERIFY_CA mode
-
-KZN-XXXXZ
-
-Query validator to block non-SELECT statements
-
-KZN-XXXA1
-
-SSH tunneling for private DBs
-
-KZN-XXXA2
-
-Write operations: INSERT/UPDATE with approval gates
-
-KZN-XXXA3
-
-Schema introspection for field picker UI
-
-KZN-XXXA4
-
-Scheduled Hydrate syncs from MySQL to Kizen custom objects
-
-KZN-XXXA5
-
-Automatic parameterization of {{variables}} to prevent SQLi
-
-9. Gotchas
-Port must be int: pymysql.connect(port=int(MYSQL_PORT)) or it fails silently.
-Charset: Always use utf8mb4 to support emoji and full Unicode.
-DictCursor required: Downstream logic expects dict rows, not tuples.
-Connection not reused: New connection per execution. No pooling in v1 to keep it simple.
-String serialization: outputs.result = str(rows) uses Python str() not json.dumps(). Downstream steps must json.loads() if needed. Document this for workflow authors.
+# MySQL Connector Module
+
+## Overview
+connect_to_mysql() handles connecting to MySQL using credentials stored in secrets, executes a query from inputs, and returns results via outputs. Built for a serverless/secret-managed environment where connection strings are stored as JSON.
+
+## Dependencies
+pymysql
+Requires DictCursor from pymysql.cursors for dict-based query results.
+
+## Expected Inputs
+The function expects these global objects:
+
+secrets: dict
+Must contain a key ending in mysql_connection with a JSON string value. Example:
+{
+  "production_db": {
+    "host": "db.prod.example.com",
+    "port": 3306,
+    "user_name": "app_user",
+    "password": "supersecret"
+  },
+  "staging_db": {
+    "host": "db.staging.example.com", 
+    "port": 3306,
+    "user_name": "staging_user",
+    "password": "stagingpass"
+  }
+}
+Note: Handles curly quotes “” by normalizing to straight quotes before json.loads().
+
+inputs: object
+- inputs.connection_secret_tag: str - Key to select from MYSQL_CONNECTION dict. Falls back to 'production_db' if not found.
+- inputs.database: str - Database name to connect to.
+- inputs.query: str - SQL query to execute.
+
+outputs: object
+Used for logging and results:
+- outputs.log(str) - Logs messages
+- outputs.result: str - Set to query result
+
+## Behavior
+
+### Connection Flow
+1. Finds secret key in secrets ending with mysql_connection
+2. Cleans curly quotes and parses JSON
+3. Selects environment using inputs.connection_secret_tag, default production_db
+4. Extracts host, port, password, user_name
+5. Connects to inputs.database with 10s timeout, utf8mb4 charset, DictCursor
+6. Logs socket and MySQL version for debugging
+
+### Query Execution
+1. Executes inputs.query
+2. Result formatting:
+   - No rows -> outputs.result = ""
+   - Single row + single column -> outputs.result = str(value) 
+   - Multiple rows/columns -> outputs.result = str(rows) where rows is list of dicts
+3. Always closes connection in finally block
+
+### Error Handling
+- json.JSONDecodeError -> logs error, returns None
+- KeyError -> logs missing key, returns None 
+- pymysql.MySQLError -> logs error, returns None
+- Connection always closed if opened
+
+## Security Notes
+1. Secret logging: outputs.log(f'Secret: {secrets}') logs all secrets in plaintext. Remove in production.
+2. SQL injection: inputs.query is executed directly with no parameterization. Only use with trusted queries or refactor to use parameterized queries.
+3. Port type: Casts MYSQL_PORT to int() - ensure secrets store port as int or string.
+
+## Usage
+# Assumes secrets, inputs, outputs are defined in scope
+db_connection = connect_to_mysql()
+# Result available in outputs.result
+print(outputs.result)
+
+## Common Issues
+Issue | Cause | Fix
+Error decoding JSON | Curly quotes or malformed JSON in secret | Current code auto-fixes “”. Check JSON syntax
+Missing key in connection JSON | Secret missing host, port, user_name, or password | Verify secret structure
+Query returned no rows | Valid query with empty result set | Expected behavior, outputs.result = ""
+None returned | Connection or JSON error occurred | Check logs for specific exception
+
+## Suggested Improvements
+1. Remove outputs.log(f'Secret: {secrets}') to avoid leaking credentials
+2. Add query parameterization instead of raw cursor.execute(INPUT_QUERY)
+3. Return rows directly instead of str(rows) for easier downstream parsing
+4. Add autocommit=True to config if running only SELECT statements
