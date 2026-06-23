@@ -12,6 +12,7 @@ The function expects these global objects:
 
 secrets: dict
 Must contain a key ending in mysql_connection with a JSON string value. Always include production_db as it's the default fallback. Example:
+```json
 {
   "production_db": {
     "host": "db.prod.example.com",
@@ -26,6 +27,7 @@ Must contain a key ending in mysql_connection with a JSON string value. Always i
     "password": "stagingpass"
   }
 }
+```
 Note: Handles curly quotes “” by normalizing to straight quotes before json.loads().
 
 inputs: object
