@@ -20,6 +20,23 @@
       "script_alias": "query"
     },
     {
+      "name": "result_format",
+      "label": "Result Format",
+      "data_type": "select",
+      "required": true,
+      "script_alias": "result_format",
+      "options": [
+        {
+          "label": "Value",
+          "value": "value"
+        },
+        {
+          "label": "Row",
+          "value": "row"
+        }
+      ]
+    },
+    {
       "name": "connection_secret_tag",
       "label": "Connection Secret Tag",
       "data_type": "string",
