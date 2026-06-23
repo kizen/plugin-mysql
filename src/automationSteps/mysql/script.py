@@ -29,8 +29,6 @@ def connect_to_mysql():
         outputs.log(f"Missing key in connection JSON: {e}")
         return None
 
-    outputs.log(f'Secret: {secrets}')
-
     INPUT_DATABASE = inputs.database
     outputs.log(f'INPUT_DATABASE: {INPUT_DATABASE}')
 
