@@ -6,13 +6,6 @@
   "runtime": "python 3.12",
   "secrets": ["mysql_connection"],
   "inputs": [{
-      "name": "user",
-      "label": "User",
-      "data_type": "string",
-      "required": true,
-      "script_alias": "user"
-    },
-    {
       "name": "database",
       "label": "Database",
       "data_type": "string",
