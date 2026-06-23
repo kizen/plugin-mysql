@@ -11,7 +11,7 @@ Requires DictCursor from pymysql.cursors for dict-based query results.
 The function expects these global objects:
 
 secrets: dict
-Must contain a key ending in mysql_connection with a JSON string value. Example:
+Must contain a key ending in mysql_connection with a JSON string value. Always include production_db as it's the default fallback. Example:
 {
   "production_db": {
     "host": "db.prod.example.com",
