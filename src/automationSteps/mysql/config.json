@@ -4,7 +4,7 @@
   "plugin_description": "MySQL connector",
   "action_type": "mysql_query",
   "runtime": "python 3.12",
-  "secrets": ["mysql_password", "mysql_host", "mysql_port"],
+  "secrets": ["mysql_connection"],
   "inputs": [{
       "name": "user",
       "label": "User",
@@ -25,6 +25,13 @@
       "data_type": "string",
       "required": true,
       "script_alias": "query"
+    },
+    {
+      "name": "connection_secret_tag",
+      "label": "Connection Secret Tag",
+      "data_type": "string",
+      "required": true,
+      "script_alias": "connection_secret_tag"
     }
   ],
   "outputs": [
