@@ -20,21 +20,12 @@
       "script_alias": "query"
     },
     {
-      "name": "result_format",
-      "label": "Result Format",
-      "data_type": "select",
+      "name": "return_single_value",
+      "label": "Return Single Value",
+      "data_type": "boolean",
       "required": true,
-      "script_alias": "result_format",
-      "options": [
-        {
-          "label": "Value",
-          "value": "value"
-        },
-        {
-          "label": "Row",
-          "value": "row"
-        }
-      ]
+      "script_alias": "result_single_value",
+      "default": true
     },
     {
       "name": "connection_secret_tag",

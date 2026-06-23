@@ -66,21 +66,24 @@ def connect_to_mysql():
             if not rows:
                 outputs.log("Query returned no rows")
                 outputs.result = ""
-            elif len(rows) == 1 and len(rows[0]) == 1:
-                # Single row, single column -> return just that value
-                single_value = next(iter(rows[0].values()))
-                outputs.log(f"Single value result: {single_value}")
-                outputs.result = str(single_value)
+            elif inputs.return_single_value:
+                if len(rows) == 1 and len(rows[0]) == 1:
+                    # Single row, single column -> return just that value
+                    single_value = next(iter(rows[0].values()))
+                    outputs.log(f"Single value result: {single_value}")
+                    outputs.result = str(single_value)
+                else:
+                    raise ValueError("Expected a single value result, but the query returned multiple rows or columns.")
             else:
                 # Multiple rows or multiple columns -> return entire dataset
-                outputs.log(f"Multiple values detected: {len(rows)} rows")
+                outputs.log(f"Multiple values/rows returned: {len(rows)} rows")
                 outputs.result = str(rows)
         
         return connection
         
     except pymysql.MySQLError as e:
         outputs.log(f"Error connecting to MySQL: {e}")
-        return None
+        raise ValueError(f"Error while using MySQL connection: {e}")
 
     finally:
         if 'connection' in locals() and connection and connection.open:
