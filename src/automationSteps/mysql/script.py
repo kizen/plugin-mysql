@@ -3,39 +3,30 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 def connect_to_mysql():
+    secret_connection = next(iter(key for key in secrets if key.endswith("mysql_connection")), None)
+    if not secret_connection:
+        raise ValueError("No mysql_connections secret found")
+    MYSQL_CONNECTION_RAW = secrets[secret_connection]
+    outputs.log(f"MYSQL_CONNECTION raw: {MYSQL_CONNECTION_RAW}")
 
-    try:
-        secret_connection = next(iter(key for key in secrets if key.endswith("mysql_connection")), None)
-        if not secret_connection:
-            raise ValueError("No mysql_connections secret found")
-        MYSQL_CONNECTION_RAW = secrets[secret_connection]
-        outputs.log(f"MYSQL_CONNECTION raw: {MYSQL_CONNECTION_RAW}")
+    # Replace curly quotes with straight quotes
+    cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
+    MYSQL_CONNECTION = json.loads(cleaned_json)
 
-        # Replace curly quotes with straight quotes
-        cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
-        MYSQL_CONNECTION = json.loads(cleaned_json)
+    # Now actually use it - pick which env you want
+    conn_data = {}
+    if inputs.connection_secret_tag:
+      if inputs.connection_secret_tag not in MYSQL_CONNECTION:
+          raise ValueError(f"Connection secret tag {inputs.connection_secret_tag} not found in MYSQL_CONNECTION")
+      conn_data = MYSQL_CONNECTION[inputs.connection_secret_tag]
+    else:
+      # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
+      conn_data = MYSQL_CONNECTION
 
-        # Now actually use it - pick which env you want
-        conn_data = {}
-        if inputs.connection_secret_tag:
-          if inputs.connection_secret_tag not in MYSQL_CONNECTION:
-              raise ValueError(f"Connection secret tag {inputs.connection_secret_tag} not found in MYSQL_CONNECTION")
-          conn_data = MYSQL_CONNECTION[inputs.connection_secret_tag]
-        else:
-          # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
-          conn_data = MYSQL_CONNECTION
-
-        MYSQL_HOST = conn_data['host']
-        MYSQL_PORT = conn_data['port']
-        MYSQL_PASSWORD = conn_data['password']
-        MYSQL_USER = conn_data['user_name']
-
-    except json.JSONDecodeError as e:
-        outputs.log(f"Error decoding JSON from connection_secret_tag: {e}")
-        return None
-    except KeyError as e:
-        outputs.log(f"Missing key in connection JSON: {e}")
-        return None
+    MYSQL_HOST = conn_data['host']
+    MYSQL_PORT = conn_data['port']
+    MYSQL_PASSWORD = conn_data['password']
+    MYSQL_USER = conn_data['user_name']
 
     INPUT_DATABASE = inputs.database
     outputs.log(f'INPUT_DATABASE: {INPUT_DATABASE}')
