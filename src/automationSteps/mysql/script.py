@@ -14,8 +14,14 @@ def connect_to_mysql():
         MYSQL_CONNECTION = json.loads(cleaned_json)
 
         # Now actually use it - pick which env you want
-        env = inputs.connection_secret_tag if inputs.connection_secret_tag in MYSQL_CONNECTION else 'production_db'
-        conn_data = MYSQL_CONNECTION[env]
+        conn_data = {}
+        if inputs.connection_secret_tag:
+          if inputs.connection_secret_tag not in MYSQL_CONNECTION:
+              raise ValueError(f"Connection secret tag {inputs.connection_secret_tag} not found in MYSQL_CONNECTION")
+          conn_data = MYSQL_CONNECTION[inputs.connection_secret_tag]
+        else:
+          # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
+          conn_data = MYSQL_CONNECTION
 
         MYSQL_HOST = conn_data['host']
         MYSQL_PORT = conn_data['port']
