@@ -47,43 +47,35 @@ def connect_to_mysql():
     outputs.log(f"Using host: {connection_config['host']} and port: {connection_config['port']}")
 
     try:
-        connection = pymysql.connect(**connection_config)
-        outputs.log("Successfully connected to MySQL database via socket")
-        
-        with connection.cursor() as cursor:
+        with pymysql.connect(**connection_config) as connection:
+            cursor = connection.cursor()
+
             cursor.execute("SELECT @@socket, @@version")
             result = cursor.fetchone()
             outputs.log(f"Socket: {result['@@socket']}")
             outputs.log(f"Version: {result['@@version']}")
-            
+
             cursor.execute(INPUT_QUERY)
             rows = cursor.fetchall()
 
             outputs.log(f"{len(rows)} rows returned")
-            
+
             if not rows:
                 outputs.log("Query returned no rows")
                 outputs.result = ""
             elif inputs.return_single_value:
                 if len(rows) == 1 and len(rows[0]) == 1:
-                    # Single row, single column -> return just that value
                     single_value = next(iter(rows[0].values()))
                     outputs.log(f"Single value result: {single_value}")
                     outputs.result = str(single_value)
                 else:
                     raise ValueError("Expected a single value result, but the query returned multiple rows or columns.")
             else:
-                # Multiple rows or multiple columns -> return entire dataset
                 outputs.log(f"Multiple values/rows returned: {len(rows)} rows")
                 outputs.result = str(rows)
-        
+
     except pymysql.MySQLError as e:
         outputs.log(f"Error connecting to MySQL: {e}")
         raise ValueError(f"Error while using MySQL connection: {e}")
-
-    finally:
-        if 'connection' in locals() and connection and connection.open:
-            connection.close()
-            outputs.log("MySQL connection closed")
 
 connect_to_mysql()
