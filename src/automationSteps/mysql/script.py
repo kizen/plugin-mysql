@@ -59,7 +59,7 @@ def connect_to_mysql():
             cursor.execute(INPUT_QUERY)
             rows = cursor.fetchall()
 
-            outputs.log(f"Rows: {rows}")
+            outputs.log(f"{len(rows)} rows returned")
             
             if not rows:
                 outputs.log("Query returned no rows")
@@ -77,8 +77,6 @@ def connect_to_mysql():
                 outputs.log(f"Multiple values/rows returned: {len(rows)} rows")
                 outputs.result = str(rows)
         
-        return connection
-        
     except pymysql.MySQLError as e:
         outputs.log(f"Error connecting to MySQL: {e}")
         raise ValueError(f"Error while using MySQL connection: {e}")
@@ -88,4 +86,4 @@ def connect_to_mysql():
             connection.close()
             outputs.log("MySQL connection closed")
 
-db_connection = connect_to_mysql()
+connect_to_mysql()
