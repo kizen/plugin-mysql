@@ -52,8 +52,6 @@ def connect_to_mysql():
             cursor.execute(INPUT_QUERY)
             rows = cursor.fetchall()
 
-            outputs.log(f"{len(rows)} rows returned")
-
             if not rows:
                 outputs.log("Query returned no rows")
                 outputs.result = ""
