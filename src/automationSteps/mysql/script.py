@@ -49,12 +49,6 @@ def connect_to_mysql():
     try:
         with pymysql.connect(**connection_config) as connection:
             cursor = connection.cursor()
-
-            cursor.execute("SELECT @@socket, @@version")
-            result = cursor.fetchone()
-            outputs.log(f"Socket: {result['@@socket']}")
-            outputs.log(f"Version: {result['@@version']}")
-
             cursor.execute(INPUT_QUERY)
             rows = cursor.fetchall()
 
