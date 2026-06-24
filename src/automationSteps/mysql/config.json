@@ -5,7 +5,8 @@
   "action_type": "mysql_query",
   "runtime": "python 3.12",
   "secrets": ["mysql_connection"],
-  "inputs": [{
+  "inputs": [
+    {
       "name": "database",
       "label": "Database",
       "data_type": "string",
