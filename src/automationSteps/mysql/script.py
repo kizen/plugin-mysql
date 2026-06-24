@@ -6,6 +6,8 @@ def connect_to_mysql():
 
     try:
         secret_connection = next(iter(key for key in secrets if key.endswith("mysql_connection")), None)
+        if not secret_connection:
+            raise ValueError("No mysql_connections secret found")
         MYSQL_CONNECTION_RAW = secrets[secret_connection]
         outputs.log(f"MYSQL_CONNECTION raw: {MYSQL_CONNECTION_RAW}")
 
