@@ -28,10 +28,7 @@ def connect_to_mysql():
     MYSQL_USER = conn_data['user_name']
 
     INPUT_DATABASE = inputs.database
-    outputs.log(f'INPUT_DATABASE: {INPUT_DATABASE}')
-
     INPUT_QUERY = inputs.query
-    outputs.log(f'INPUT_QUERY: {INPUT_QUERY}')
 
     connection_config = {
         'host': MYSQL_HOST,
