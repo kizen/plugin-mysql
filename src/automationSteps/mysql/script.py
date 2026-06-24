@@ -69,7 +69,6 @@ def connect_to_mysql():
                 outputs.result = str(rows)
 
     except pymysql.MySQLError as e:
-        outputs.log(f"Error connecting to MySQL: {e}")
         raise ValueError(f"Error while using MySQL connection: {e}")
 
 connect_to_mysql()
