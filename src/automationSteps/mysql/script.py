@@ -1,4 +1,5 @@
 import json
+import secrets
 import pymysql
 from pymysql.cursors import DictCursor
 
@@ -7,7 +8,6 @@ def connect_to_mysql():
     if not secret_connection:
         raise ValueError("No mysql_connections secret found")
     MYSQL_CONNECTION_RAW = secrets[secret_connection]
-    outputs.log(f"MYSQL_CONNECTION raw: {MYSQL_CONNECTION_RAW}")
 
     # Replace curly quotes with straight quotes
     cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
