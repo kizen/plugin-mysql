@@ -38,7 +38,8 @@ def connect_to_mysql():
         'database': INPUT_DATABASE,
         'charset': 'utf8mb4',
         'cursorclass': DictCursor,    
-        'connect_timeout': 10         
+        'connect_timeout': 10,
+        'autocommit': True
     }
 
     outputs.log(f"Using host: {connection_config['host']} and port: {connection_config['port']}")
@@ -47,21 +48,31 @@ def connect_to_mysql():
         with pymysql.connect(**connection_config) as connection:
             cursor = connection.cursor()
             cursor.execute(INPUT_QUERY)
-            rows = cursor.fetchall()
 
-            if not rows:
-                outputs.log("Query returned no rows")
-                outputs.result = ""
-            elif inputs.return_single_value:
-                if len(rows) == 1 and len(rows[0]) == 1:
-                    single_value = next(iter(rows[0].values()))
-                    outputs.log(f"Single value result: {single_value}")
-                    outputs.result = str(single_value)
-                else:
-                    raise ValueError("Expected a single value result, but the query returned multiple rows or columns.")
+            # Check if it's a write query
+            if INPUT_QUERY.strip().lower().startswith(('insert', 'update', 'delete')):
+                connection.commit() # Commit the transaction for write queries
+                rows_affected = cursor.rowcount
+                last_id = cursor.lastrowid # useful for INSERT with AUTO_INCREMENT
+
+                outputs.log(f"Write query successful. Rows affected: {rows_affected}")
+                outputs.result = f"Rows affected: {rows_affected}, Last ID: {last_id}"
             else:
-                outputs.log(f"Multiple values/rows returned: {len(rows)} rows")
-                outputs.result = str(rows)
+                # Your existing SELECT logic
+                rows = cursor.fetchall()
+                if not rows:
+                    outputs.log("Query returned no rows")
+                    outputs.result = ""
+                elif inputs.return_single_value:
+                    if len(rows) == 1 and len(rows[0]) == 1:
+                        single_value = next(iter(rows[0].values()))
+                        outputs.log(f"Single value result: {single_value}")
+                        outputs.result = str(single_value)
+                    else:
+                        raise ValueError("Expected a single value result, but the query returned multiple rows or columns.")
+                else:
+                    outputs.log(f"Multiple values/rows returned: {len(rows)} rows")
+                    outputs.result = str(rows)
 
     except pymysql.MySQLError as e:
         raise ValueError(f"Error while using MySQL connection: {e}")
