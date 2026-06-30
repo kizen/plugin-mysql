@@ -10,7 +10,16 @@ def connect_to_mysql():
     MYSQL_CONNECTION_RAW = secrets[secret_connection]
 
     # Replace curly quotes with straight quotes
-    cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
+    SMART_QUOTE_MAP = str.maketrans({
+        '\u201c': '"',  # “
+        '\u201d': '"',  # ”
+        '\u2018': "'",  # ‘
+        '\u2019': "'",  # ’
+        '\u201b': "'",  # ‛ single high-reversed-9
+        '\u201e': '"',  # „ double low-9
+        '\u201f': '"',  # ‟ double high-reversed-9
+    })
+    cleaned_json = MYSQL_CONNECTION_RAW.translate(SMART_QUOTE_MAP)
     MYSQL_CONNECTION = json.loads(cleaned_json)
 
     # Now actually use it - pick which env you want

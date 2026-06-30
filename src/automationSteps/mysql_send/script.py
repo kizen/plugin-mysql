@@ -9,7 +9,16 @@ def connect_to_mysql():
     MYSQL_CONNECTION_RAW = secrets[secret_connection]
 
     # Replace curly quotes with straight quotes
-    cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
+    SMART_QUOTE_MAP = str.maketrans({
+        '\u201c': '"',  # “
+        '\u201d': '"',  # ”
+        '\u2018': "'",  # ‘
+        '\u2019': "'",  # ’
+        '\u201b': "'",  # ‛ single high-reversed-9
+        '\u201e': '"',  # „ double low-9
+        '\u201f': '"',  # ‟ double high-reversed-9
+    })
+    cleaned_json = MYSQL_CONNECTION_RAW.translate(SMART_QUOTE_MAP)
     MYSQL_CONNECTION = json.loads(cleaned_json)
 
     # Now actually use it - pick which env you want
@@ -53,10 +62,9 @@ def connect_to_mysql():
             if INPUT_QUERY.strip().lower().startswith(('insert', 'update', 'delete')):
                 connection.commit() # Commit the transaction for write queries
                 rows_affected = cursor.rowcount
-                last_id = cursor.lastrowid # useful for INSERT with AUTO_INCREMENT
 
                 outputs.log(f"Write query successful. Rows affected: {rows_affected}")
-                outputs.result = f"Rows affected: {rows_affected}, Last ID: {last_id}"
+                outputs.result = f"Rows affected: {rows_affected}"
             else:
                 # Your existing SELECT logic
                 rows = cursor.fetchall()
