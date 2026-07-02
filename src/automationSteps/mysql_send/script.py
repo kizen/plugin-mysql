@@ -64,7 +64,7 @@ def connect_to_mysql():
                 rows_affected = cursor.rowcount
 
                 outputs.log(f"Write query successful. Rows affected: {rows_affected}")
-                outputs.result = f"Rows affected: {rows_affected}"
+                outputs.result = str(rows_affected)
             else:
                 # Your existing SELECT logic
                 rows = cursor.fetchall()
