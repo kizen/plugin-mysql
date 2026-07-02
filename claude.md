@@ -2,7 +2,24 @@
 
 ## Overview
 
-connect_to_mysql() handles connecting to MySQL using credentials stored in secrets, executes a query from inputs, and returns results via outputs. Built for a serverless/secret-managed environment where connection strings are stored as JSON.
+## Files
+
+### 1. `mysql_get`
+**Purpose**: Read-only queries against Snowflake. Returns query results as strings.
+
+**Key Features**
+- **Read-only guardrail**: Regex check blocks `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, `CREATE`, `GRANT`, `REVOKE`, `COPY`, `CALL`, `DO`. Only `SELECT` queries should pass.
+- **Smart quote normalization**: Converts curly quotes `“”‘’` to straight quotes before `json.loads()` to handle copy-paste from docs.
+- **Multi-env support**: Reads `MYSQL_CONNECTION` secret. If `inputs.connection_secret_tag` is set, uses that nested key. Otherwise treats the secret as flat.
+- **Single value mode**: Set `inputs.return_single_value = True` to extract one cell. Throws if query returns >1 row or >1 column.
+
+### 2. `mysql_send`  
+**Purpose**: Write operations against Snowflake. Returns stats + results.
+
+**Key Features**
+- **No SQL guardrail**: Intentionally allows `INSERT`, `UPDATE`, `DELETE`, etc. Use with caution..
+- **Same secret/env handling** as `mysql_get`
+- **Single value mode** also supported for write queries that return a value, e.g. `INSERT ... RETURNING id`
 
 ## Dependencies
 
