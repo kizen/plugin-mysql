@@ -4,7 +4,7 @@
 
 ## Files
 
-### 1. `mysql_get`
+### 1. `mysql_read`
 **Purpose**: Read-only queries against Snowflake. Returns query results as strings.
 
 **Key Features**
@@ -13,12 +13,12 @@
 - **Multi-env support**: Reads `MYSQL_CONNECTION` secret. If `inputs.connection_secret_tag` is set, uses that nested key. Otherwise treats the secret as flat.
 - **Single value mode**: Set `inputs.return_single_value = True` to extract one cell. Throws if query returns >1 row or >1 column.
 
-### 2. `mysql_send`  
+### 2. `mysql_write`  
 **Purpose**: Write operations against Snowflake. Returns stats + results.
 
 **Key Features**
 - **No SQL guardrail**: Intentionally allows `INSERT`, `UPDATE`, `DELETE`, etc. Use with caution..
-- **Same secret/env handling** as `mysql_get`
+- **Same secret/env handling** as `mysql_read`
 - **Single value mode** also supported for write queries that return a value, e.g. `INSERT ... RETURNING id`
 
 ## Dependencies

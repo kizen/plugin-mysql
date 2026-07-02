@@ -1,8 +1,8 @@
 {
-  "name": "Get Data",
-  "action_description": "Connects to MySQL and executes a query to get data",
+  "name": "Read Data",
+  "action_description": "Connects to MySQL and executes a query to read data",
   "plugin_description": "MySQL Connector",
-  "action_type": "mysql_get_data",
+  "action_type": "mysql_read_data",
   "runtime": "python 3.12",
   "secrets": ["mysql_connection"],
   "inputs": [
