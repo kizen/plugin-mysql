@@ -59,17 +59,13 @@ def connect_to_mysql():
     outputs.log(f"Using host: {connection_config['host']} and port: {connection_config['port']}")
 
     try:
-        with pymysql.connect(**connection_config) as connection:
-            cursor = connection.cursor()
+        with pymysql.connect(**connection_config) as connection, connection.cursor() as cursor:
             cursor.execute(INPUT_QUERY)
 
-            # Check if it's a write query
-            if INPUT_QUERY.strip().lower().startswith(('insert', 'update', 'delete')):
+            if cursor.description is None: # True for INSERT/UPDATE/DELETE
                 connection.commit() # Commit the transaction for write queries
-                rows_affected = cursor.rowcount
-
-                outputs.log(f"Write query successful. Rows affected: {rows_affected}")
-                outputs.result = str(rows_affected)
+                outputs.log(f"Rows affected: {cursor.rowcount}")
+                outputs.result = str(cursor.rowcount)
             else:
                 # Your existing SELECT logic
                 rows = cursor.fetchall()
