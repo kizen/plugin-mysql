@@ -1,5 +1,6 @@
 import json
 import pymysql
+import re
 from pymysql.cursors import DictCursor
 
 def connect_to_mysql():
@@ -9,7 +10,16 @@ def connect_to_mysql():
     MYSQL_CONNECTION_RAW = secrets[secret_connection]
 
     # Replace curly quotes with straight quotes
-    cleaned_json = MYSQL_CONNECTION_RAW.replace('“', '"').replace('”', '"')
+    SMART_QUOTE_MAP = str.maketrans({
+        '\u201c': '"',  # “
+        '\u201d': '"',  # ”
+        '\u2018': "'",  # ‘
+        '\u2019': "'",  # ’
+        '\u201b': "'",  # ‛ single high-reversed-9
+        '\u201e': '"',  # „ double low-9
+        '\u201f': '"',  # ‟ double high-reversed-9
+    })
+    cleaned_json = MYSQL_CONNECTION_RAW.translate(SMART_QUOTE_MAP)
     MYSQL_CONNECTION = json.loads(cleaned_json)
 
     # Now actually use it - pick which env you want
@@ -22,14 +32,25 @@ def connect_to_mysql():
       # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
       conn_data = MYSQL_CONNECTION
 
+    REQUIRED_KEYS = ('host', 'port', 'user_name', 'password')
+    missing_keys = [key for key in REQUIRED_KEYS if key not in conn_data]
+    if missing_keys:
+        raise ValueError(f"MySQL connection secret is missing required key(s): {', '.join(missing_keys)}")
+
     MYSQL_HOST = conn_data['host']
     MYSQL_PORT = conn_data['port']
     MYSQL_PASSWORD = conn_data['password']
     MYSQL_USER = conn_data['user_name']
 
     INPUT_DATABASE = inputs.database
-    INPUT_QUERY = inputs.query
+    INPUT_QUERY = inputs.query.strip()
 
+    # --- READ-ONLY GUARDRAIL: Validate query ---
+    # Block obvious write/DDL keywords. This regex checks start of query and after semicolons
+    write_keywords = r'^\s*(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|LOAD|CALL)\b'
+    if re.search(write_keywords, INPUT_QUERY, re.IGNORECASE | re.MULTILINE):
+        raise ValueError("Only SELECT/SHOW/DESCRIBE queries allowed. Write/DDL statements are blocked.")
+    
     connection_config = {
         'host': MYSQL_HOST,
         'port': int(MYSQL_PORT),
@@ -38,7 +59,8 @@ def connect_to_mysql():
         'database': INPUT_DATABASE,
         'charset': 'utf8mb4',
         'cursorclass': DictCursor,    
-        'connect_timeout': 10         
+        'connect_timeout': 10,
+        'autocommit': True
     }
 
     outputs.log(f"Using host: {connection_config['host']} and port: {connection_config['port']}")
@@ -46,6 +68,7 @@ def connect_to_mysql():
     try:
         with pymysql.connect(**connection_config) as connection:
             cursor = connection.cursor()
+            cursor.execute("SET SESSION TRANSACTION READ ONLY")
             cursor.execute(INPUT_QUERY)
             rows = cursor.fetchall()
 

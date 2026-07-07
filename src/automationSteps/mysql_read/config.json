@@ -1,8 +1,8 @@
 {
-  "name": "Run Query",
-  "action_description": "Connects to MySQL and executes a query",
-  "plugin_description": "MySQL connector",
-  "action_type": "mysql_query",
+  "name": "Read Data",
+  "action_description": "Connects to MySQL and executes a query to read data",
+  "plugin_description": "MySQL Connector",
+  "action_type": "mysql_read_data",
   "runtime": "python 3.12",
   "secrets": ["mysql_connection"],
   "inputs": [
@@ -32,7 +32,7 @@
       "name": "connection_secret_tag",
       "label": "Connection Secret Tag",
       "data_type": "string",
-      "required": true,
+      "required": false,
       "script_alias": "connection_secret_tag"
     }
   ],
