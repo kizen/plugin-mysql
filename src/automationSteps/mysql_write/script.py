@@ -31,6 +31,11 @@ def connect_to_mysql():
       # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
       conn_data = MYSQL_CONNECTION
 
+    REQUIRED_KEYS = ('host', 'port', 'user_name', 'password')
+    missing_keys = [key for key in REQUIRED_KEYS if key not in conn_data]
+    if missing_keys:
+        raise ValueError(f"MySQL connection secret is missing required key(s): {', '.join(missing_keys)}")
+
     MYSQL_HOST = conn_data['host']
     MYSQL_PORT = conn_data['port']
     MYSQL_PASSWORD = conn_data['password']

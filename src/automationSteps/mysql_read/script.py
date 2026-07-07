@@ -32,6 +32,11 @@ def connect_to_mysql():
       # If no connection secret tag is provided, MYSQL_CONNECTION isn't nested
       conn_data = MYSQL_CONNECTION
 
+    REQUIRED_KEYS = ('host', 'port', 'user_name', 'password')
+    missing_keys = [key for key in REQUIRED_KEYS if key not in conn_data]
+    if missing_keys:
+        raise ValueError(f"MySQL connection secret is missing required key(s): {', '.join(missing_keys)}")
+
     MYSQL_HOST = conn_data['host']
     MYSQL_PORT = conn_data['port']
     MYSQL_PASSWORD = conn_data['password']
@@ -42,8 +47,8 @@ def connect_to_mysql():
 
     # --- READ-ONLY GUARDRAIL: Validate query ---
     # Block obvious write/DDL keywords. This regex checks start of query and after semicolons
-    forbidden_pattern = r'^\s*(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|LOAD|CALL)\b'
-    if re.search(forbidden_pattern, INPUT_QUERY, re.IGNORECASE | re.MULTILINE):
+    write_keywords = r'^\s*(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|LOAD|CALL)\b'
+    if re.search(write_keywords, INPUT_QUERY, re.IGNORECASE | re.MULTILINE):
         raise ValueError("Only SELECT/SHOW/DESCRIBE queries allowed. Write/DDL statements are blocked.")
     
     connection_config = {
