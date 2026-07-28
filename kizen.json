@@ -1,6 +1,6 @@
 {
   "name": "MySQL Connection",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "published": true,
   "release_branch": ["main"],
   "api_name": "plugin_mysql",
