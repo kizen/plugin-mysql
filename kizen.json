@@ -9,7 +9,7 @@
   "entry": "src/",
   "engine": "1.0.0",
   "release_notes_directory": "releaseNotes/",
-  "release_environments": ["staging"],
+  "release_environments": ["prod", "dev"],
   "config_template": {},
   "base_config": {
     "secrets": ["mysql_connection"]
