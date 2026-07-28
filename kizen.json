@@ -1,6 +1,6 @@
 {
   "name": "MySQL Connection",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "published": true,
   "release_branch": ["main"],
   "api_name": "plugin_mysql",
@@ -9,10 +9,10 @@
   "entry": "src/",
   "engine": "1.0.0",
   "release_notes_directory": "releaseNotes/",
-  "release_environments": ["staging"],
+  "release_environments": ["prod", "dev"],
   "config_template": {},
   "base_config": {
     "secrets": ["mysql_connection"]
   },
-  "developer_business_id": { "staging": "0fbf2bd5-f7c4-4bb1-a354-6d3d79120a41" }
+  "developer_business_id": {}
 }
