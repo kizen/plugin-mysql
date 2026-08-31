@@ -7,13 +7,13 @@ Kizen MySQL Connector — connect an external MySQL database to Kizen Agentic Wo
 ### `mysql_read` (Read Data)
 Read-only queries against MySQL. Returns query results as strings.
 
-- **Read-only guardrail**: Regex check blocks `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, `CREATE`, `GRANT`, `REVOKE`, `COPY`, `CALL`, `DO`. Only `SELECT`/`SHOW`/`DESCRIBE` queries pass.
+- **Read-only guardrail**: Blocks queries starting with write/DDL keywords (`INSERT`, `UPDATE`, `DELETE`, `REPLACE`, `CREATE`, `DROP`, `ALTER`, `TRUNCATE`, `GRANT`, `REVOKE`, `LOAD`, `CALL`) and sets the session to `TRANSACTION READ ONLY` before executing.
 - **Smart quote normalization**: Converts curly quotes `“”‘’` to straight quotes before `json.loads()` to handle copy-paste from docs.
 - **Multi-env support**: Reads the `mysql_connection` secret. If `connection_secret_tag` is set, uses that nested key. Otherwise treats the secret as flat.
 - **Single value mode**: Set `return_single_value = true` to extract one cell. Throws if the query returns more than one row or column.
 
 ### `mysql_write` (Write Data)
-Write operations against MySQL. Returns stats + results.
+Write operations against MySQL. Returns affected row count for write queries (no result set) or query results as strings when a result set is returned.
 
 - **No SQL guardrail**: Intentionally allows `INSERT`, `UPDATE`, `DELETE`, etc. Use with caution.
 - Same secret/env handling as `mysql_read`.
@@ -25,7 +25,7 @@ Write operations against MySQL. Returns stats + results.
 
 ## Secrets
 
-Both steps expect a secret named `mysql_connection` containing a JSON string. Always include `production_db` as it's the default fallback.
+Both steps expect a secret named `mysql_connection` containing a JSON string. In the nested form, set `connection_secret_tag` to the environment key to use (e.g., `production_db`).
 
 Multi-environment (nested) form:
 
