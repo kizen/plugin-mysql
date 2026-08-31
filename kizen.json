@@ -2,7 +2,7 @@
   "name": "MySQL Connection",
   "version": "1.0.4",
   "published": true,
-  "release_branch": ["main"],
+  "release_branches": ["main"],
   "api_name": "plugin_mysql",
   "external_link": "",
   "description": "Connect to an external MySQL database to power Agentic Workflows with real-time data lookups.",
