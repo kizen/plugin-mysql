@@ -23,7 +23,7 @@ def connect_to_mysql():
 
     # Now actually use it - pick which env you want
     conn_data = {}
-    if inputs.connection_secret_tag:
+    if getattr(inputs, "connection_secret_tag", None):
       if inputs.connection_secret_tag not in MYSQL_CONNECTION:
           raise ValueError(f"Connection secret tag {inputs.connection_secret_tag} not found in MYSQL_CONNECTION")
       conn_data = MYSQL_CONNECTION[inputs.connection_secret_tag]
